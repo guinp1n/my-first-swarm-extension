@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the main class of the extension,
@@ -31,13 +33,14 @@ import java.nio.charset.StandardCharsets;
  * @since 4.6.0
  */
 public class HelloWorldMain implements ExtensionMain {
-
+    private static final @NotNull Logger log = LoggerFactory.getLogger(HelloWorldMain.class);
     @Override
     public void extensionMain(final @NotNull ExtensionContext extensionContext) {
         final Counter counter = extensionContext.getMetricRegistry().counter("payloads.generated");
         extensionContext.getExtensionRegistry().addPayloadGenerator("hello-world-generator", payloadGeneratorInput -> {
             counter.inc();
             final String payload = "HelloWorld";
+            log.debug("hello-world-generator says: Generated payload #" + counter.getCount() + ": " + payload);
             return ByteBuffer.wrap((payload).getBytes(StandardCharsets.UTF_8));
         });
     }

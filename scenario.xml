@@ -1,0 +1,61 @@
+<scenario>
+  <brokers>
+    <broker id="node-1">
+      <address>localhost</address>
+      <port>1883</port>
+    </broker>
+  </brokers>
+  <clientGroups>
+    <clientGroup id="publishers">
+      <clientIdPattern>publisher-[0-9]{4}</clientIdPattern>
+      <count>1</count>
+      <mqttVersion>5</mqttVersion>
+    </clientGroup>
+    <clientGroup id="subscribers">
+      <clientIdPattern>subscriber-[0-9]{3}</clientIdPattern>
+      <count>1</count>
+      <mqttVersion>5</mqttVersion>
+    </clientGroup>
+  </clientGroups>
+  <topicGroups>
+    <topicGroup id="topics">
+      <topicNamePattern>the/topic</topicNamePattern>
+      <count>1</count>
+    </topicGroup>
+  </topicGroups>
+  <subscriptions>
+    <subscription id="subscription">
+      <topicGroup>topics</topicGroup>
+    </subscription>
+  </subscriptions>
+  <stages>
+    <stage id="connect_subscriber_stage">
+      <lifeCycle id="subs" clientGroup="subscribers">
+        <delay duration="10s" spread="linear"></delay>
+        <connect broker="node-1"></connect>
+        <subscribe to="subscription"></subscribe>
+      </lifeCycle>
+    </stage>
+    <stage id="connect_publisher_stage">
+      <lifeCycle id="pubs" clientGroup="publishers">
+        <delay duration="10s" spread="linear"></delay>
+        <connect broker="node-1"></connect>
+      </lifeCycle>
+    </stage>
+    <stage id="publish_data_stage">
+      <lifeCycle id="publish" clientGroup="publishers">
+        <publish topicGroup="topics" count="60" rate="1/1s" payloadGeneratorType="hello-world-generator"></publish>
+      </lifeCycle>
+    </stage>
+    <stage id="disconnect_stage">
+      <lifeCycle id="disconnect_cg2" clientGroup="publishers">
+        <delay duration="30s" spread="linear"></delay>
+        <disconnect></disconnect>
+      </lifeCycle>
+      <lifeCycle id="disconnect_cg1" clientGroup="subscribers">
+        <delay duration="10s" spread="linear"></delay>
+        <disconnect></disconnect>
+      </lifeCycle>
+    </stage>
+  </stages>
+</scenario>
